@@ -129,4 +129,14 @@ describe("Marking", function() {
         assert.equal($.get_state().cards.get("id1"), 2);
     });
 
+    it("Card exhaustion", function() {
+        init(["id1", "id2", "id3"], true, draw);
+        for(let c = 0; c < 11; c++) {
+            update({type: "mark", correct: true});
+        }
+        assert.deepEqual($.get_state().cards, new Map([["id1", 0]]));
+        assert.equal(draw_parameters.id, "id1");
+        update({type: "mark", correct: true});
+        assert.isNull(draw_parameters.id);
+    });
 });
