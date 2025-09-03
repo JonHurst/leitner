@@ -95,13 +95,6 @@ function new_session(state) {
 }
 
 
-function dump_state(state) {
-    console.log("Session: ", state.session);
-    console.log(state);
-}
-
-
-
 function update(msg) {
     switch(msg?.type) {
 
