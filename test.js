@@ -18,7 +18,6 @@ describe("Initialisation", function() {
 
     it("Initialise three ids", function() {
         init(["id1", "id2", "id3"], true, draw);
-        console.log($.get_state());
         assert.deepEqual(
             $.get_state(),
             {
@@ -59,6 +58,17 @@ describe("Initialisation", function() {
             }
         );
     });
+
+    it("Initialise from storage", function() {
+        init(["id1", "id2", "id3"], true, draw);
+        update({type: "mark", correct: true});
+        init(["id1", "id2", "id3"], false, draw);
+        assert.equal($.get_state().cards.get("id3"), 0);
+        init(["id2", "id3", "id4"], false, draw);
+        assert.equal($.get_state().cards.get("id3"), 0);
+        assert.isFalse($.get_state().cards.has("id1"));
+        assert.equal($.get_state().cards.get("id4"), "current");
+    });
 });
 
 
@@ -91,8 +101,32 @@ describe("Marking", function() {
 
     it("Correct behaviour in response to mark messages", function() {
         init(["id1", "id2", "id3"], true, draw);
+        // move id3 to box 0
         update({type: "mark", correct: true});
-        console.log($.get_state());
+        assert.equal($.get_state().cards.get("id3"), 0);
+        // id1 and id2 stay in current
+        update({type: "mark", correct: false});
+        update({type: "mark", correct: false});
+        assert.equal($.get_state().cards.get("id1"), "current");
+        assert.equal($.get_state().cards.get("id2"), "current");
+        // session should now be 1, and should be drawing id2
+        assert.equal($.get_state().session, 1);
+        assert.equal(draw_parameters.id, "id2");
+        // move id2 to box 1
+        update({type: "mark", correct: true});
+        // id1 stays in current
+        update({type: "mark", correct: false});
+        // session should now be 2, which includes box 0, so should be
+        // drawing id3
+        assert.equal(draw_parameters.id, "id3");
+        // move id3 to current
+        update({type: "mark", correct: false});
+        assert.equal($.get_state().cards.get("id3"), "current");
+        // should be drawing id1
+        assert.equal(draw_parameters.id, "id1");
+        // move id1 to box 2
+        update({type: "mark", correct: true});
+        assert.equal($.get_state().cards.get("id1"), 2);
     });
 
 });
