@@ -10,7 +10,6 @@ function draw(id, redact, status) {
     draw_parameters = {id, redact, status};
 };
 
-$.set_shuffled(a => [...a]);
 
 // tests
 
@@ -134,7 +133,9 @@ describe("Marking", function() {
         for(let c = 0; c < 11; c++) {
             update({type: "mark", correct: true});
         }
-        assert.deepEqual($.get_state().cards, new Map([["id1", 0]]));
+        assert.equal($.get_state().cards.get("id1"), 0);
+        assert.equal($.get_state().cards.get("id2"), "done");
+        assert.equal($.get_state().cards.get("id3"), "done");
         assert.equal(draw_parameters.id, "id1");
         update({type: "mark", correct: true});
         assert.isNull(draw_parameters.id);

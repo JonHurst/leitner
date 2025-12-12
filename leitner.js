@@ -11,7 +11,7 @@ const SESSION_BOXES = [
     [0, "current", 9, 4, 7]
 ];
 
-let SAVE_ID = "flashcard_v3" +
+let SAVE_ID = "flashcard_v4" +
     (window.URL.parse(document.URL)?.pathname || "_default");
 
 let state = {session: -1, cards: new Map(), draw: null};
@@ -48,13 +48,17 @@ function init(ids, clean, draw_func) {
 
 
 function next_card(state) {
-    if(!state.cards.size) return null;
     if(state?.active?.length) {
         state.redact = true;
         return state.active.pop();
     } else {
         state.session = (state.session + 1) % 10;
         state.active = new_session(state);
+        // if new session is empty, check whether it is because all cards are done
+        if(!state.active.length &&
+           [...state.cards].filter(e => e[1] != "done").length == 0) {
+                return null;
+        }
         return next_card(state);
     }
 }
@@ -91,7 +95,7 @@ function new_session(state) {
             session_ids.push(key);
         }
     }
-    return shuffled(session_ids);
+    return session_ids;
 }
 
 
@@ -110,7 +114,7 @@ function update(msg) {
             }
             else if(state.cards.get(state.current_id) ==
                     SESSION_BOXES[state.session][0]) {
-                state.cards.delete(state.current_id);
+                state.cards.set(state.current_id, "done");
             }
         }
         else {  // incorrect
@@ -120,12 +124,12 @@ function update(msg) {
         break;
     }
 
-    let [n_new, n_current] = ["new", "current"].map(t =>
+    let [n_new, n_current, n_done] = ["new", "current", "done"].map(t =>
         [...state.cards].filter(e => e[1] == t).length);
     const status = {
         new: n_new,
         current: n_current,
-        boxed: state.cards.size - n_new - n_current
+        boxed: state.cards.size - n_new - n_current - n_done
     };
     if(state.draw) {
         state.draw(state.current_id, state.redact, status);
@@ -144,8 +148,7 @@ const _TESTING = {
     new_session,
     next_card,
     get_state: () => state,
-    set_shuffled: (func) => {shuffled = func;}
 };
 
 //
-export {init, update, _TESTING};
+export {init, update, shuffled, _TESTING};
