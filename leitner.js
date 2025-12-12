@@ -30,7 +30,7 @@ function init(ids, clean, draw_func) {
         let json_str = window?.localStorage?.getItem(SAVE_ID);
         if(json_str) {
             let json = JSON.parse(json_str);
-            state = {session: json.session, cards: new Map(json.cards)};
+            state = {session: json.session - 1, cards: new Map(json.cards)};
         }
     }
     for(let [key, val] of state.cards) {
