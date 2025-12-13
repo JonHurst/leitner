@@ -98,7 +98,11 @@ function update(msg) {
         state.current_id = next_card(state);
         break;
     }
-    state.draw(state.current_id, state.redact, {});
+    let status = [];
+    for(let c of [1, 2, 4, 8, 16]) {
+        status.push([...state.cards.values().filter(v => v.increment == c)].length);
+    }
+    state.draw(state.current_id, state.redact, status);
     let json_str = JSON.stringify({
         cards: [...state.cards.entries()]
     });

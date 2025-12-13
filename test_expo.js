@@ -35,7 +35,7 @@ describe("Initialisation", function() {
             {
                 id: "id1",
                 redact: true,
-                status: {}
+                status: [3, 0, 0, 0, 0]
             }
         );
     });
@@ -73,7 +73,7 @@ describe("Redact Management", function() {
             {
                 id: "id1",
                 redact: true,
-                status: {}
+                status: [3, 0, 0, 0, 0]
             }
         );
         update({type: "reveal"});
@@ -82,7 +82,7 @@ describe("Redact Management", function() {
             {
                 id: "id1",
                 redact: false,
-                status: {}
+                status: [3, 0, 0, 0, 0]
             }
         );
     });
