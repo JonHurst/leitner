@@ -28,7 +28,6 @@ describe("Initialisation", function() {
                 draw: draw,
                 redact: true,
                 current_id: "id1",
-                slice: 10
             }
         );
         assert.deepEqual(
@@ -39,6 +38,17 @@ describe("Initialisation", function() {
                 status: {}
             }
         );
+    });
+
+
+    it("Initialise fifteen ids", function() {
+        let ids = [];
+        for(let c = 0; c < 15; c++) {
+            ids.push(`id_${c}`);
+        }
+        init(ids, true, draw);
+        assert.deepEqual($.get_state().cards.get("id_9"), {counter: 0, increment: 1});
+        assert.deepEqual($.get_state().cards.get("id_10"), {counter: 1, increment: 1});
     });
 
 

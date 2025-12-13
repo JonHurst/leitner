@@ -1,6 +1,6 @@
 let SAVE_ID = "flashcard_v5" +
     (window.URL.parse(document.URL)?.pathname || "_default");
-let SLICE_SIZE = 10;
+let BATCH_SIZE = 10;
 
 let ID = e => document.getElementById(e);
 
@@ -11,23 +11,25 @@ function init(ids, clean, draw_func) {
     let saved_cards;
     if(clean) {
         window?.localStorage?.removeItem(SAVE_ID);
-        state.slice = SLICE_SIZE;
     }
     else {
         let json_str = window?.localStorage?.getItem(SAVE_ID);
         if(json_str) {
             let json = JSON.parse(json_str);
             saved_cards = new Map(json.cards);
-            state.slice = json.slice;
         }
     }
     state.cards = new Map();
+    let c = 0;
     for(let id of ids) {
         if(saved_cards?.has(id)) {
             state.cards.set(id, saved_cards.get(id));
         }
         else {
-            state.cards.set(id, {counter: 0, increment: 1});
+            state.cards.set(id, {
+                counter: Math.floor(c++ / BATCH_SIZE),
+                increment: 1
+            });
         }
     }
     state.draw = draw_func;
@@ -37,17 +39,12 @@ function init(ids, clean, draw_func) {
 
 function next_card(state) {
     while(true) {
-        let c = 0;
         for(let [key, val] of state.cards) {
             if(val.counter == 0) {
                 return key;
             }
-            if(++c == state.slice) {
-                break;
-            }
         }
         // if no counters are at zero, subtract 1 from all counters and retry
-        c = 0;
         for(let [key, val] of state.cards) {
             state.cards.set(
                 key,
@@ -55,11 +52,7 @@ function next_card(state) {
                     counter: val.counter - 1,
                     increment: val.increment
                 });
-            if(++c == state.slice) {
-                break;
-            }
         }
-        state.slice += SLICE_SIZE;
     }
 }
 
@@ -107,8 +100,7 @@ function update(msg) {
     }
     state.draw(state.current_id, state.redact, {});
     let json_str = JSON.stringify({
-        cards: [...state.cards.entries()],
-        slice: state.slice
+        cards: [...state.cards.entries()]
     });
     window?.localStorage?.setItem(SAVE_ID, json_str);
 }
