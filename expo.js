@@ -2,17 +2,14 @@ let SAVE_ID = "flashcard_v5" +
     (window.URL.parse(document.URL)?.pathname || "_default");
 let BATCH_SIZE = 10;
 
-let ID = e => document.getElementById(e);
-
 let state = {};
+function draw(id, redact, status) {}
 
 
 function init(ids, clean, draw_func) {
+    draw = draw_func;
     let saved_cards;
-    if(clean) {
-        window?.localStorage?.removeItem(SAVE_ID);
-    }
-    else {
+    if(!clean) {
         let json_str = window?.localStorage?.getItem(SAVE_ID);
         if(json_str) {
             let json = JSON.parse(json_str);
@@ -32,12 +29,11 @@ function init(ids, clean, draw_func) {
             });
         }
     }
-    state.draw = draw_func;
     update({type: "init"});
 }
 
 
-function next_card(state) {
+function next_card() {
     while(true) {
         for(let [key, val] of state.cards) {
             if(val.counter == 0) {
@@ -57,26 +53,12 @@ function next_card(state) {
 }
 
 
-function shuffled(a) {
-    let s = [...a];
-    let cur = s.length;
-    while (cur !== 0) {
-        let rand = Math.floor(Math.random() * cur);
-        cur--;
-        let temp = s[cur];
-        s[cur] = s[rand];
-        s[rand] = temp;
-    }
-    return s;
-}
-
-
 function update(msg) {
     switch(msg?.type) {
 
     case "init":
         state.redact = true;
-        state.current_id = next_card(state);
+        state.current_id = next_card();
         break;
 
     case "reveal":
@@ -95,18 +77,32 @@ function update(msg) {
                 increment: new_increment
             });
         state.redact = true;
-        state.current_id = next_card(state);
+        state.current_id = next_card();
         break;
     }
     let status = [];
     for(let c of [1, 2, 4, 8, 16]) {
         status.push([...state.cards.values().filter(v => v.increment == c)].length);
     }
-    state.draw(state.current_id, state.redact, status);
+    draw(state.current_id, state.redact, status);
     let json_str = JSON.stringify({
         cards: [...state.cards.entries()]
     });
     window?.localStorage?.setItem(SAVE_ID, json_str);
+}
+
+
+function shuffled(a) {
+    let s = [...a];
+    let cur = s.length;
+    while (cur !== 0) {
+        let rand = Math.floor(Math.random() * cur);
+        cur--;
+        let temp = s[cur];
+        s[cur] = s[rand];
+        s[rand] = temp;
+    }
+    return s;
 }
 
 

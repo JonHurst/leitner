@@ -25,7 +25,6 @@ describe("Initialisation", function() {
                     ["id2", {counter: 0, increment: 1}],
                     ["id3", {counter: 0, increment: 1}]
                 ]),
-                draw: draw,
                 redact: true,
                 current_id: "id1",
             }
