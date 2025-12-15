@@ -4,11 +4,9 @@ let BATCH_SIZE = 10;
 
 
 function draw(id, redact, status) {}
-let card = {};
-
+function update(msg) {}
 
 function init(ids, clean, draw_func) {
-    draw = draw_func;
     let saved_cards;
     if(!clean) {
         let json_str = window?.localStorage?.getItem(SAVE_ID);
@@ -29,35 +27,36 @@ function init(ids, clean, draw_func) {
             });
         }
     }
-    card = cardFactory(cards);
+    draw = draw_func;
+    update = _update.bind(cardOps(cards));
     update({type: "init"});
 }
 
 
-function update(msg) {
+function _update(msg) {
     let curr;
     let redact = true;
     switch(msg?.type) {
 
     case "init":
-        curr = card.next();
+        curr = this.next();
         break;
 
     case "reveal":
-        curr = card.current();
+        curr = this.current();
         redact = false;
         break;
 
     case "mark":  // {type: "mark", correct: true/false}
-        card.mark(msg.correct);
-        curr = card.next();
+        this.mark(msg.correct);
+        curr = this.next();
         break;
     }
     draw(curr.id, redact, curr.status);
 };
 
 
-function cardFactory(cards) {
+function cardOps(cards) {
     let iter = cards.entries();
     let current_id;
     function save() {
