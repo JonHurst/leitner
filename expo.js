@@ -3,31 +3,8 @@ let SAVE_ID = "flashcard_v6" +
 let BATCH_SIZE = 10;
 
 
-function next_card() {};
 function draw(id, redact, status) {}
-
-
-let update = (function() {
-    let current;
-    return (msg) => {
-        let redact = true;
-        switch(msg?.type) {
-
-        case "init":
-            current = next_card();
-            break;
-
-        case "reveal":
-            redact = false;
-            break;
-
-        case "mark":  // {"mark", correct: bool}
-            current = next_card(msg.correct);
-            break;
-        }
-        draw(current.id, redact, current.status);
-    };
-})();
+let card = {};
 
 
 function init(ids, clean, draw_func) {
@@ -52,11 +29,69 @@ function init(ids, clean, draw_func) {
             });
         }
     }
-    // create card iterator
-    let iter = card_iterator(cards);
-    next_card = (correct) => iter.next(correct).value;
-    // display first card
+    card = cardFactory(cards);
     update({type: "init"});
+}
+
+
+function update(msg) {
+    let curr;
+    let redact = true;
+    switch(msg?.type) {
+
+    case "init":
+        curr = card.next();
+        break;
+
+    case "reveal":
+        curr = card.current();
+        redact = false;
+        break;
+
+    case "mark":  // {type: "mark", correct: true/false}
+        card.mark(msg.correct);
+        curr = card.next();
+        break;
+    }
+    draw(curr.id, redact, curr.status);
+};
+
+
+function cardFactory(cards) {
+    let iter = cards.entries();
+    let current_id;
+    function save() {
+        window?.localStorage?.setItem(
+            SAVE_ID,
+            JSON.stringify([...cards.entries()]));
+    };
+    return {
+        current() {
+            return {id: current_id, status: status(cards)};
+        },
+        next() {
+            let res;
+            while(true) {
+                res = iter.next();
+                if(res.done) {
+                    cards.values().forEach(v => v.counter--);
+                    iter = cards.entries();
+                    res = iter.next();
+                }
+                if(res.value[1].counter == 0) break;
+            }
+            current_id = res.value[0];
+            save();
+            return {id: current_id, status: status(cards)};
+        },
+        mark(correct) {
+            let state = cards.get(current_id);
+            state.counter = state.increment = correct ?
+                Math.min(state.increment * 2, 16) :
+                Math.max(state.increment / 4, 1);
+            save();
+        }
+    };
 }
 
 
@@ -66,24 +101,6 @@ function status(cards) {
         counts.set(val.increment, counts.get(val.increment) + 1);
     }
     return [...counts.values()].join(" ");
-}
-
-
-function* card_iterator(cards) {
-    while(true) {
-        for(let [key, val] of cards) {
-            if(val.counter == 0) {
-                const res = yield {id: key, status: status(cards)};
-                val.counter = val.increment =  res ?
-                    Math.min(val.increment * 2, 16) :
-                    Math.max(val.increment / 4, 1);
-                window?.localStorage?.setItem(
-                    SAVE_ID,
-                    JSON.stringify([...cards.entries()]));
-            }
-        }
-        cards.values().forEach(v => v.counter--);
-    }
 }
 
 
