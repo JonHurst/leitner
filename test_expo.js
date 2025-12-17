@@ -90,7 +90,7 @@ describe("Initialisation", function() {
         assert.deepEqual(
             draw_parameters,
             {
-                id: "id4",
+                id: "id3",
                 state: "redacted",
                 status: "1 1 0 0 0"
             }

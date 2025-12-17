@@ -65,18 +65,18 @@ function cardOps(cards) {
             return {id: current_id, status: status(cards)};
         },
         next() {
-            let res;
             while(true) {
-                res = iter.next();
+                let res = iter.next();
                 if(res.done) {
                     iter = cards.entries();
                     res = iter.next();
                 }
-                if(res.value[1].counter == 0)
+                if(res.value[1].counter == 0) {
+                    current_id = res.value[0];
                     break;
+                }
                 res.value[1].counter--;
             }
-            current_id = res.value[0];
             save();
             return {id: current_id, status: status(cards)};
         },
