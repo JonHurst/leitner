@@ -1,4 +1,4 @@
-import {init, update} from "./expo.js";
+import {init} from "./expo.js";
 let assert = chai.assert;
 
 // mocks
@@ -16,7 +16,8 @@ function draw(id, redact, status) {
 describe("Initialisation", function() {
 
     it("Initialise three ids", function() {
-        init(["id1", "id2", "id3"], true, draw);
+        let update = init(["id1", "id2", "id3"], true, draw);
+        update({type: "start"});
         assert.deepEqual(
             draw_parameters,
             {
@@ -54,7 +55,8 @@ describe("Initialisation", function() {
 describe("Redact Management", function() {
 
     it("Correct calling of draw after redact message sent", function() {
-        init(["id1", "id2", "id3"], true, draw);
+        let update = init(["id1", "id2", "id3"], true, draw);
+        update({type: "start"});
         assert.deepEqual(
             draw_parameters,
             {
@@ -79,7 +81,8 @@ describe("Redact Management", function() {
 describe("Marking", function() {
 
     it("Correct behaviour in response to mark messages", function() {
-        init(["id1", "id2", "id3"], true, draw);
+        let update = init(["id1", "id2", "id3"], true, draw);
+        update({type: "start"});
         update({type: "mark", correct: true});
         // id1: 2 2, id2: 0 1, id3 0 1
         assert.deepEqual(

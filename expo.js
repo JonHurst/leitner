@@ -3,9 +3,6 @@ let SAVE_ID = "flashcard_v6" +
 let BATCH_SIZE = 10;
 
 
-function draw(id, redact, status) {}
-function update(msg) {}
-
 function init(ids, clean, draw_func) {
     let saved_cards;
     if(!clean) {
@@ -27,29 +24,27 @@ function init(ids, clean, draw_func) {
             });
         }
     }
-    draw = draw_func;
-    update = _update.bind(cardOps(cards));
-    update({type: "init"});
+    return update.bind(null, cardOps(cards), draw_func);
 }
 
 
-function _update(msg) {
+function update(card_op, draw, msg) {
     let curr;
     let redact = true;
     switch(msg?.type) {
 
-    case "init":
-        curr = this.next();
+    case "start":
+        curr = card_op.next();
         break;
 
     case "reveal":
-        curr = this.current();
+        curr = card_op.current();
         redact = false;
         break;
 
     case "mark":  // {type: "mark", correct: true/false}
-        this.mark(msg.correct);
-        curr = this.next();
+        card_op.mark(msg.correct);
+        curr = card_op.next();
         break;
     }
     draw(curr.id, redact, curr.status);
@@ -116,4 +111,4 @@ function shuffled(a) {
     return s;
 }
 
-export {init, update, shuffled};
+export {init, shuffled};
