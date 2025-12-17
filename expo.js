@@ -30,24 +30,25 @@ function init(ids, clean, draw_func) {
 
 function update(card_op, draw, msg) {
     let curr;
-    let redact = true;
+    let state;
     switch(msg?.type) {
 
-    case "start":
+    case "next":
         curr = card_op.next();
+        state = "redacted";
         break;
 
     case "reveal":
         curr = card_op.current();
-        redact = false;
+        state = "revealed";
         break;
 
     case "mark":  // {type: "mark", correct: true/false}
-        card_op.mark(msg.correct);
-        curr = card_op.next();
+        curr = card_op.mark(msg.correct);
+        state = msg.correct ? "correct" : "incorrect";
         break;
     }
-    draw(curr.id, redact, curr.status);
+    draw(curr.id, state, curr.status);
 };
 
 
@@ -72,7 +73,10 @@ function cardOps(cards) {
                     iter = cards.entries();
                     res = iter.next();
                 }
-                if(res.value[1].counter == 0) break;
+                if(res.value[1].counter == 0) {
+                    res.value[1].counter = 1;
+                    break;
+                }
             }
             current_id = res.value[0];
             save();
@@ -84,6 +88,7 @@ function cardOps(cards) {
                 Math.min(state.increment * 2, 16) :
                 Math.max(state.increment / 4, 1);
             save();
+            return {id: current_id, status: status(cards)};
         }
     };
 }
