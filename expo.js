@@ -69,14 +69,12 @@ function cardOps(cards) {
             while(true) {
                 res = iter.next();
                 if(res.done) {
-                    cards.values().forEach(v => v.counter--);
                     iter = cards.entries();
                     res = iter.next();
                 }
-                if(res.value[1].counter == 0) {
-                    res.value[1].counter = 1;
+                if(res.value[1].counter == 0)
                     break;
-                }
+                res.value[1].counter--;
             }
             current_id = res.value[0];
             save();
@@ -84,9 +82,10 @@ function cardOps(cards) {
         },
         mark(correct) {
             let state = cards.get(current_id);
-            state.counter = state.increment = correct ?
+            state.increment = correct ?
                 Math.min(state.increment * 2, 16) :
                 Math.max(state.increment / 4, 1);
+            state.counter = state.increment - 1;
             save();
             return {id: current_id, status: status(cards)};
         }
