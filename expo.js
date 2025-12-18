@@ -101,17 +101,4 @@ function status(cards) {
 }
 
 
-function shuffled(a) {
-    let s = [...a];
-    let cur = s.length;
-    while (cur !== 0) {
-        let rand = Math.floor(Math.random() * cur);
-        cur--;
-        let temp = s[cur];
-        s[cur] = s[rand];
-        s[rand] = temp;
-    }
-    return s;
-}
-
-export {init, shuffled};
+export {init};
