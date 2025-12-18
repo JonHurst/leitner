@@ -1,12 +1,16 @@
-let SAVE_ID = "flashcard_v6" +
-    (window.URL.parse(document.URL)?.pathname || "_default");
 let BATCH_SIZE = 10;
+
+
+function save_id() {
+    return "flashcard_v6" +
+        (window.URL.parse(document.URL)?.pathname || "_default");
+}
 
 
 function init(ids, clean, draw_func) {
     let saved_cards;
     if(!clean) {
-        let json_str = window?.localStorage?.getItem(SAVE_ID);
+        let json_str = window?.localStorage?.getItem(save_id());
         if(json_str) {
             saved_cards = new Map(JSON.parse(json_str));
         }
@@ -57,7 +61,7 @@ function cardOps(cards) {
     let current_id;
     function save() {
         window?.localStorage?.setItem(
-            SAVE_ID,
+            save_id(),
             JSON.stringify([...cards.entries()]));
     };
     return {
