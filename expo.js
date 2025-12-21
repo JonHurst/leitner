@@ -16,17 +16,10 @@ function init(ids, clean, draw_func) {
         }
     }
     let cards = new Map();
-    let c = 0;
     for(let id of ids) {
-        if(saved_cards?.has(id)) {
-            cards.set(id, saved_cards.get(id));
-        }
-        else {
-            cards.set(id, {
-                counter: 2 * Math.floor(c++ / BATCH_SIZE),
-                increment: 1
-            });
-        }
+        cards.set(id, saved_cards?.has(id) ?
+                  saved_cards.get(id) :
+                  {counter: 1, increment: 1});
     }
     return update.bind(null, cardOps(cards), draw_func);
 }
@@ -58,6 +51,7 @@ function update(card_op, draw, msg) {
 
 function cardOps(cards) {
     let iter = cards.entries();
+    let new_ = 0;
     let current_id;
     function save() {
         window?.localStorage?.setItem(
@@ -74,8 +68,12 @@ function cardOps(cards) {
                 if(res.done) {
                     cards.values().forEach(v => v.counter--);
                     iter = cards.entries();
+                    new_ = 0;
                 } else if(res.value[1].counter == 0) {
                     res.value[1].counter = 1;
+                    // take at most BATCH_SIZE new cards per round
+                    if(res.value[1].increment == 1 && ++new_ > BATCH_SIZE)
+                        continue;
                     current_id = res.value[0];
                     break;
                 }

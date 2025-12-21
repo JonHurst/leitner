@@ -29,27 +29,6 @@ describe("Initialisation", function() {
     });
 
 
-    it("Initialise fifteen ids", function() {
-        let ids = [];
-        for(let c = 0; c < 15; c++) {
-            ids.push(`id_${c}`);
-        }
-        let update = init(ids, true, draw);
-        for(let c = 0 ; c < 10; c++) {
-            update({type: "next"});
-            assert.equal(draw_parameters.id, ids[c]);
-        }
-        for(let c = 0 ; c < 10; c++) {
-            update({type: "next"});
-            assert.equal(draw_parameters.id, ids[c]);
-        }
-        for(let c = 0 ; c < 15; c++) {
-            update({type: "next"});
-            assert.equal(draw_parameters.id, ids[c]);
-        }
-    });
-
-
     it("Initialise from storage", function() {
         let update = init(["id1", "id2", "id3"], true, draw);
         update({type: "next"});
@@ -262,4 +241,38 @@ describe("Marking", function() {
         );
     });
 
+    it("Introduction of new cards", function() {
+        let ids = [];
+        for(let c = 0; c < 20; c++) {
+            ids.push(`id_${c}`);
+        }
+        let update = init(ids, true, draw);
+        for(let c = 0 ; c < 10; c++) {
+            update({type: "next"});
+            assert.equal(draw_parameters.id, ids[c]);
+            update({type: "mark", correct: false});
+            assert.equal(draw_parameters.id, ids[c]);
+        }
+        // since all marked incorrect, should repeat first 10
+        for(let c = 0 ; c < 10; c++) {
+            update({type: "next"});
+            assert.equal(draw_parameters.id, ids[c]);
+            update({type: "mark", correct: true});
+            assert.equal(draw_parameters.id, ids[c]);
+        }
+        // since all marked correct, should get second 10
+        for(let c = 0 ; c < 10; c++) {
+            update({type: "next"});
+            assert.equal(draw_parameters.id, ids[c + 10]);
+            update({type: "mark", correct: true});
+            assert.equal(draw_parameters.id, ids[c + 10]);
+        }
+        // since all marked correct, should get all 20
+        for(let c = 0 ; c < 20; c++) {
+            update({type: "next"});
+            assert.equal(draw_parameters.id, ids[c]);
+            update({type: "mark", correct: true});
+            assert.equal(draw_parameters.id, ids[c]);
+        }
+    });
 });
