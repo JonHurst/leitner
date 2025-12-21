@@ -264,11 +264,25 @@ describe("Marking", function() {
         for(let c = 0 ; c < 10; c++) {
             update({type: "next"});
             assert.equal(draw_parameters.id, ids[c + 10]);
+            update({type: "mark", correct: false});
+            assert.equal(draw_parameters.id, ids[c + 10]);
+        }
+        // since all marked incorrect, should get all 20 ...
+        for(let c = 0 ; c < 20; c++) {
+            update({type: "next"});
+            assert.equal(draw_parameters.id, ids[c]);
+            update({type: "mark", correct: true});
+            assert.equal(draw_parameters.id, ids[c]);
+        }
+        // ... followed by second 10 again ...
+        for(let c = 0 ; c < 10; c++) {
+            update({type: "next"});
+            assert.equal(draw_parameters.id, ids[c + 10]);
             update({type: "mark", correct: true});
             assert.equal(draw_parameters.id, ids[c + 10]);
         }
-        // since all marked correct, should get all 20
-        for(let c = 0 ; c < 20; c++) {
+        // ... followed by first 10
+        for(let c = 0 ; c < 10; c++) {
             update({type: "next"});
             assert.equal(draw_parameters.id, ids[c]);
             update({type: "mark", correct: true});
